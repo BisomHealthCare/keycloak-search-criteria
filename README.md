@@ -6,6 +6,8 @@ It brings an improved version of the existing `GET /{realm}/users` endpoint that
  - User account status (enabled or not)
  - User email verification status
 
+The user representation returned by this endpoint also includes realm and client roles for each user.
+
 This extension is designed for **Keycloak 11.0.3**. 
 
 # Installation

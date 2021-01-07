@@ -12,7 +12,7 @@ public class UsersPageRepresentation {
     /**
      * Users
      */
-    List<UserRepresentation> users;
+    List<CustomUserRepresentation> users;
 
     /**
      * Total users count
@@ -25,16 +25,16 @@ public class UsersPageRepresentation {
     protected UsersPageRepresentation() {
     }
 
-    public UsersPageRepresentation(List<UserRepresentation> users, int count) {
+    public UsersPageRepresentation(List<CustomUserRepresentation> users, int count) {
         this.users = users;
         this.count = count;
     }
 
-    public List<UserRepresentation> getUsers() {
+    public List<CustomUserRepresentation> getUsers() {
         return users;
     }
 
-    public void setUsers(List<UserRepresentation> users) {
+    public void setUsers(List<CustomUserRepresentation> users) {
         this.users = users;
     }
 

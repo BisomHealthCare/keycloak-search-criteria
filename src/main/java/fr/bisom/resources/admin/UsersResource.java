@@ -1,12 +1,14 @@
 package fr.bisom.resources.admin;
 
+import fr.bisom.models.utils.ModelToCustomRepresentation;
 import fr.bisom.queries.GetUsersByCriteriaQuery;
+import fr.bisom.representations.CustomUserRepresentation;
 import fr.bisom.representations.UsersPageRepresentation;
 import org.jboss.resteasy.annotations.cache.NoCache;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
@@ -26,11 +28,13 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
 
     private AdminPermissionEvaluator auth;
     private KeycloakSession kcSession;
+    private List<ClientModel> clients;
 
     public UsersResource(KeycloakSession session, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent) {
         super(session.getContext().getRealm(), auth, adminEvent);
         this.auth = auth;
         this.kcSession = session;
+        this.clients = kcSession.clients().getClients(realm);
     }
 
     /**
@@ -84,7 +88,7 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
 
         int count = qry.getTotalCount();
         List<UserModel> results = qry.execute(firstResult, maxResults);
-        return new UsersPageRepresentation(toUserRepresentation(realm, auth.users(), briefRepresentation, results), count);
+        return new UsersPageRepresentation(toUserRepresentation(realm, clients, auth.users(), briefRepresentation, results), count);
     }
 
     /**
@@ -96,9 +100,9 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
      * @param userModels
      * @return a list of UserRepresentations
      */
-    private List<UserRepresentation> toUserRepresentation(RealmModel realm, UserPermissionEvaluator usersEvaluator, Boolean briefRepresentation, List<UserModel> userModels) {
+    private List<CustomUserRepresentation> toUserRepresentation(RealmModel realm, List<ClientModel> clients, UserPermissionEvaluator usersEvaluator, Boolean briefRepresentation, List<UserModel> userModels) {
         boolean briefRepresentationB = briefRepresentation != null && briefRepresentation;
-        List<UserRepresentation> results = new ArrayList<>();
+        List<CustomUserRepresentation> results = new ArrayList<>();
         boolean canViewGlobal = usersEvaluator.canView();
 
         usersEvaluator.grantIfNoPermission(kcSession.getAttribute(UserModel.GROUPS) != null);
@@ -107,9 +111,9 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
             if (!canViewGlobal && !usersEvaluator.canView(user)) {
                 continue;
             }
-            UserRepresentation userRep = briefRepresentationB
-                    ? ModelToRepresentation.toBriefRepresentation(user)
-                    : ModelToRepresentation.toRepresentation(kcSession, realm, user);
+            CustomUserRepresentation userRep = briefRepresentationB
+                    ? ModelToCustomRepresentation.toBriefCustomRepresentation(user)
+                    : ModelToCustomRepresentation.toCustomRepresentation(kcSession, realm, clients, user);
             userRep.setAccess(usersEvaluator.getAccess(user));
             results.add(userRep);
         }
