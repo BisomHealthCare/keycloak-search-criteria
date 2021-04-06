@@ -32,6 +32,7 @@ public class GetUsersByCriteriaQuery {
 
     /**
      * Creates an instance of FindUsersByCriteriaQuery: this object is used to build a FindUsersByCriteria request
+     *
      * @param session
      * @param auth
      */
@@ -53,6 +54,7 @@ public class GetUsersByCriteriaQuery {
 
     /**
      * Add predicates to search users by first name, last name, email and username
+     *
      * @param last     Searched last name
      * @param first    Searched first name
      * @param email    Searched email
@@ -60,16 +62,16 @@ public class GetUsersByCriteriaQuery {
      */
     public void addPredicateSearchFields(String last, String first, String email, String username) {
         int count = predicates.size();
-        if(last != null && !last.isEmpty()) {
+        if (last != null && !last.isEmpty()) {
             addPredicateLike(userEntityRoot.get(UserModel.LAST_NAME), last);
         }
-        if(first != null && !first.isEmpty()) {
+        if (first != null && !first.isEmpty()) {
             addPredicateLike(userEntityRoot.get(UserModel.FIRST_NAME), first);
         }
-        if(email != null && !email.isEmpty()) {
+        if (email != null && !email.isEmpty()) {
             addPredicateLike(userEntityRoot.get(UserModel.EMAIL), email);
         }
-        if(username != null && !username.isEmpty()) {
+        if (username != null && !username.isEmpty()) {
             addPredicateLike(userEntityRoot.get(UserModel.USERNAME), username);
         }
         boolean includeServiceAccount = predicates.size() != count;
@@ -88,20 +90,22 @@ public class GetUsersByCriteriaQuery {
 
     /**
      * Add predicates to filter users by account status and email verification status
-     * @param enabled     User account status
-     * @param emailVerified    User email verification status
+     *
+     * @param enabled       User account status
+     * @param emailVerified User email verification status
      */
     public void addPredicateBooleanSearchFields(Boolean enabled, Boolean emailVerified) {
-        if(enabled != null) {
+        if (enabled != null) {
             predicates.add(builder.equal(userEntityRoot.get(UserModel.ENABLED), enabled));
         }
-        if(emailVerified != null) {
+        if (emailVerified != null) {
             predicates.add(builder.equal(userEntityRoot.get("emailVerified"), emailVerified));
         }
     }
 
     /**
      * Add predicates to search users using a global criteria which can match part of either the username, the full name (first + last name) or the email
+     *
      * @param search The searched value
      */
     public void addPredicateSearchGlobal(String search) {
@@ -122,6 +126,7 @@ public class GetUsersByCriteriaQuery {
 
     /**
      * Add a filtering according to the given list of group identifiers
+     *
      * @param groups
      */
     public void addPredicateForGroups(List<String> groups) {
@@ -132,7 +137,18 @@ public class GetUsersByCriteriaQuery {
     }
 
     /**
+     * Add a predicate to retrieve all user that are not members of a group
+     */
+    public void addPredicateWithoutGroupsOnly() {
+        this.auth.groups().requireView();
+        Subquery<UserGroupMembershipEntity> ugmSubquery = userEntityQry.subquery(UserGroupMembershipEntity.class);
+        Root<UserGroupMembershipEntity> userGroupMembership = ugmSubquery.from(UserGroupMembershipEntity.class);
+        predicates.add(builder.not(userEntityRoot.get("id").in(ugmSubquery.select(userGroupMembership.get("user").get("id")))));
+    }
+
+    /**
      * Add a filtering according to the given list of role identifiers
+     *
      * @param roles
      */
     public void addPredicateForRoles(List<String> roles) {
@@ -149,7 +165,7 @@ public class GetUsersByCriteriaQuery {
     }
 
     private Predicate createPredicateLike(Expression<String> expr, String value) {
-            return builder.like(builder.lower(expr), "%" + value.toLowerCase() + "%");
+        return builder.like(builder.lower(expr), "%" + value.toLowerCase() + "%");
     }
 
     private Subquery<?> createGroupsSubQuery(List<String> groups) {
@@ -178,6 +194,7 @@ public class GetUsersByCriteriaQuery {
 
     /**
      * Get the total number of matched rows
+     *
      * @return number of matched rows
      */
     public int getTotalCount() {

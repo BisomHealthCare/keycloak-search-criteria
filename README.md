@@ -51,6 +51,7 @@ GET /auth/realms/master/extended-api/realms/{realm}/users
 | Query  | `optional` groupId |  | string |
 | Query  | `optional` enabled |  | boolean |
 | Query  | `optional` emailVerified |  | boolean |
+| Query  | `optional` withoutGroupsOnly | If true, returns only user's without group memberships (defaults to false) | boolean |
 
 #### Responses
 

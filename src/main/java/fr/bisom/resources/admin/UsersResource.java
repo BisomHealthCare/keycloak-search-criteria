@@ -46,16 +46,20 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
      * Adding multiple groups and multiple roles will give the intersection of users that belong both to the the specified groups and the specified roles
      * If either groups or roles are specified in the call, paging with "first" and/or "max" is impossible, and trying will return a 501.
      *
-     * @param groups     A list of group Ids
-     * @param roles      A list of realm role names
-     * @param search     A special search field: when used, all other search fields are ignored. Can be something like id:abcd-efg-123
-     *                   or a string which can be contained in the first+last name, email or username
-     * @param last       A user's last name
-     * @param first      A user's first name
-     * @param email      A user's email
-     * @param username   A user's username
-     * @param first      Pagination offset
-     * @param maxResults Maximum results size (defaults to 100) - only taken into account if no group / role is defined
+     * @param groups              A list of group Ids
+     * @param roles               A list of realm role names
+     * @param search              A special search field: when used, all other search fields are ignored. Can be something like id:abcd-efg-123
+     *                            or a string which can be contained in the first+last name, email or username
+     * @param last                A user's last name
+     * @param first               A user's first name
+     * @param email               A user's email
+     * @param username            A user's username
+     * @param enabled             User account status (enabled/disabled)
+     * @param emailVerified       User email verification status
+     * @param firstResult         Pagination offset
+     * @param maxResults          Maximum results size (defaults to 100) - only taken into account if no group / role is defined
+     * @param briefRepresentation Response format option
+     * @param withoutGroupsB      Return users without group memberships
      * @return A list of users corresponding to the searched parameters, as well as the total count of users
      */
     @GET
@@ -72,7 +76,9 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
                                                       @QueryParam("emailVerified") Boolean emailVerified,
                                                       @QueryParam("first") Integer firstResult,
                                                       @QueryParam("max") Integer maxResults,
-                                                      @QueryParam("briefRepresentation") Boolean briefRepresentation) {
+                                                      @QueryParam("briefRepresentation") Boolean briefRepresentation,
+                                                      @QueryParam("withoutGroupsOnly") Boolean withoutGroupsOnly) {
+        boolean withoutGroupsOnlyB = withoutGroupsOnly != null && withoutGroupsOnly;
         GetUsersByCriteriaQuery qry = new GetUsersByCriteriaQuery(kcSession, auth);
 
         if (search != null && !search.isEmpty()) {
@@ -82,7 +88,13 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
         }
 
         qry.addPredicateBooleanSearchFields(enabled, emailVerified);
-        qry.addPredicateForGroups(groups);
+
+        if (withoutGroupsOnlyB) {
+            qry.addPredicateWithoutGroupsOnly();
+        } else {
+            qry.addPredicateForGroups(groups);
+        }
+
         qry.addPredicateForRoles(roles);
         qry.applyPredicates();
 
