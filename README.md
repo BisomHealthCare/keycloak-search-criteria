@@ -8,7 +8,13 @@ It brings an improved version of the existing `GET /{realm}/users` endpoint that
 
 The user representation returned by this endpoint also includes realm and client roles for each user.
 
-This extension is designed for **Keycloak 11.0.3**. 
+# Compatibility table 
+
+This table lists the compatibility of this extension with keycloak releases. Other versions might be compatible but have not been tested.
+
+| Extension version  | Keycloak versions  |
+|---|---|
+| 11.0.3  | 11.0.3, 12.0.4  |
 
 # Installation
 
