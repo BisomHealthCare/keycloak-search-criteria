@@ -1,3 +1,3 @@
-FROM jboss/keycloak:11.0.3
+FROM jboss/keycloak:12.0.4
 ADD deployments/ /opt/jboss/keycloak/standalone/deployments/
 
