@@ -173,7 +173,7 @@ public class GetUsersByCriteriaQuery {
         Root<UserGroupMembershipEntity> userGroupMembership = ugmSubquery.from(UserGroupMembershipEntity.class);
         return ugmSubquery
                 .select(userGroupMembership.get("user").get("id"))
-                .where(userGroupMembership.get("group").get("id").in(groups));
+                .where(userGroupMembership.get("groupId").in(groups));
     }
 
     private Subquery<?> createRolesSubQuery(List<String> roles) {
