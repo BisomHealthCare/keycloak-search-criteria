@@ -12,9 +12,10 @@ The user representation returned by this endpoint also includes realm and client
 
 This table lists the compatibility of this extension with keycloak releases. Other versions might be compatible but have not been tested.
 
-| Extension version  | Keycloak versions  |
+| Extension version  | Compatible keycloak versions  |
 |---|---|
-| 11.0.3  | 11.0.3, 12.0.4  |
+| 12.0.4  | 12.0.4 |
+| 11.0.3  | 11.0.3 |
 
 # Installation
 
