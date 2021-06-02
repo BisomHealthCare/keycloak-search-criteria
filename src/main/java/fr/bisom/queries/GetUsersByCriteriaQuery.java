@@ -1,10 +1,13 @@
 package fr.bisom.queries;
 
+import fr.bisom.resources.admin.UsersResource;
+import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
+import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserGroupMembershipEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
@@ -16,11 +19,14 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GetUsersByCriteriaQuery {
     private static final String SEARCH_ID_PARAMETER = "id:"; // From org.keycloak.services.resources.admin.UsersResource
+
+    protected static final Logger logger = Logger.getLogger(GetUsersByCriteriaQuery.class);
 
     private final KeycloakSession session;
     private final AdminPermissionEvaluator auth;
@@ -158,6 +164,16 @@ public class GetUsersByCriteriaQuery {
         }
     }
 
+    public void addPredicateForAttributes(Map<String, String> attributes) {
+        logger.info("Adding attribute predicates");
+        if (attributes != null && !attributes.isEmpty()) {
+            List<Predicate> attributePredicates = attributes.entrySet().stream()
+                    .map(entry -> userEntityRoot.get("id").in(createAttributeSubQuery(entry.getKey(), entry.getValue())))
+                    .collect(Collectors.toList());
+            predicates.addAll(attributePredicates);
+        }
+    }
+
     private void addPredicateLike(Expression<String> expr, String value) {
         if (value != null && !value.isEmpty()) {
             predicates.add(createPredicateLike(expr, value));
@@ -182,6 +198,17 @@ public class GetUsersByCriteriaQuery {
         return urmSubquery
                 .select(userRoleMembership.get("user").get("id"))
                 .where(userRoleMembership.get("roleId").in(roles));
+    }
+
+    private Subquery<?> createAttributeSubQuery(String key, String value) {
+        Subquery<UserAttributeEntity> urmSubquery = userEntityQry.subquery(UserAttributeEntity.class);
+        Root<UserAttributeEntity> userAttributes = urmSubquery.from(UserAttributeEntity.class);
+        return urmSubquery
+                .select(userAttributes.get("user").get("id"))
+                .where(builder.and(
+                        builder.equal(userAttributes.get("name"), key),
+                        builder.equal(userAttributes.get("value"), value)
+                ));
     }
 
     /**

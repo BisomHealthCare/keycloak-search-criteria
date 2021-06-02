@@ -5,6 +5,7 @@ It brings an improved version of the existing `GET /{realm}/users` endpoint that
  - Group and role membership.
  - User account status (enabled or not)
  - User email verification status
+ - User attributes 
 
 The user representation returned by this endpoint also includes realm and client roles for each user.
 
@@ -14,7 +15,7 @@ This table lists the compatibility of this extension with keycloak releases. Oth
 
 | Extension version  | Compatible keycloak versions  |
 |---|---|
-| 12.0.4  | 12.0.4 |
+| 12.0.4, 12.0.5  | 12.0.4 |
 | 11.0.3  | 11.0.3 |
 
 # Installation
@@ -59,6 +60,7 @@ GET /auth/realms/master/extended-api/realms/{realm}/users
 | Query  | `optional` enabled |  | boolean |
 | Query  | `optional` emailVerified |  | boolean |
 | Query  | `optional` withoutGroupsOnly | If true, returns only user's without group memberships (defaults to false) | boolean |
+| Query  | `optional` [attribute_key] | filter users by specifying an attribute key/value pair ex: `?attributeKey=attributeValue` | string |
 
 #### Responses
 
