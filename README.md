@@ -5,6 +5,7 @@ It brings an improved version of the existing `GET /{realm}/users` endpoint that
  - Group and role membership.
  - User account status (enabled or not)
  - User email verification status
+ - User attributes 
 
 The user representation returned by this endpoint also includes realm and client roles for each user.
 
@@ -59,6 +60,7 @@ GET /auth/realms/master/extended-api/realms/{realm}/users
 | Query  | `optional` enabled |  | boolean |
 | Query  | `optional` emailVerified |  | boolean |
 | Query  | `optional` withoutGroupsOnly | If true, returns only user's without group memberships (defaults to false) | boolean |
+| Query  | `optional` [attribute_key] | filter users by specifying an attribute key/value pair ex: `?attributeKey=attributeValue` | string |
 
 #### Responses
 

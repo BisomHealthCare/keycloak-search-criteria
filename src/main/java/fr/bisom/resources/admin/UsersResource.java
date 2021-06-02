@@ -1,9 +1,13 @@
 package fr.bisom.resources.admin;
 
 import fr.bisom.models.utils.ModelToCustomRepresentation;
+import fr.bisom.params.UserCriteria;
 import fr.bisom.queries.GetUsersByCriteriaQuery;
 import fr.bisom.representations.CustomUserRepresentation;
 import fr.bisom.representations.UsersPageRepresentation;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.jboss.logging.Logger;
+import org.jboss.resteasy.annotations.Query;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
@@ -14,12 +18,20 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.UserPermissionEvaluator;
 
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Extended UsersResource
@@ -29,6 +41,8 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
     private AdminPermissionEvaluator auth;
     private KeycloakSession kcSession;
     private List<ClientModel> clients;
+
+    protected static final Logger logger = Logger.getLogger(UsersResource.class);
 
     public UsersResource(KeycloakSession session, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent) {
         super(session.getContext().getRealm(), auth, adminEvent);
@@ -59,48 +73,48 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
      * @param firstResult         Pagination offset
      * @param maxResults          Maximum results size (defaults to 100) - only taken into account if no group / role is defined
      * @param briefRepresentation Response format option
-     * @param withoutGroupsB      Return users without group memberships
+     * @param withoutGroupsOnly      Return users without group memberships
      * @return A list of users corresponding to the searched parameters, as well as the total count of users
      */
     @GET
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public UsersPageRepresentation getUsersByCriteria(@QueryParam("groupId") List<String> groups,
-                                                      @QueryParam("roleId") List<String> roles,
-                                                      @QueryParam("search") String search,
-                                                      @QueryParam("lastName") String last,
-                                                      @QueryParam("firstName") String first,
-                                                      @QueryParam("email") String email,
-                                                      @QueryParam("username") String username,
-                                                      @QueryParam("enabled") Boolean enabled,
-                                                      @QueryParam("emailVerified") Boolean emailVerified,
-                                                      @QueryParam("first") Integer firstResult,
-                                                      @QueryParam("max") Integer maxResults,
-                                                      @QueryParam("briefRepresentation") Boolean briefRepresentation,
-                                                      @QueryParam("withoutGroupsOnly") Boolean withoutGroupsOnly) {
-        boolean withoutGroupsOnlyB = withoutGroupsOnly != null && withoutGroupsOnly;
+    public UsersPageRepresentation getUsersByCriteria(@BeanParam UserCriteria criteria) {
+        boolean withoutGroupsOnlyB = criteria.getWithoutGroupsOnly() != null && criteria.getWithoutGroupsOnly();
         GetUsersByCriteriaQuery qry = new GetUsersByCriteriaQuery(kcSession, auth);
 
-        if (search != null && !search.isEmpty()) {
-            qry.addPredicateSearchGlobal(search);
+        if (criteria.getSearch() != null && !criteria.getSearch().isEmpty()) {
+            qry.addPredicateSearchGlobal(criteria.getSearch());
         } else {
-            qry.addPredicateSearchFields(last, first, email, username);
+            qry.addPredicateSearchFields(criteria.getLast(), criteria.getFirst(), criteria.getEmail(), criteria.getUsername());
         }
 
-        qry.addPredicateBooleanSearchFields(enabled, emailVerified);
+        qry.addPredicateBooleanSearchFields(criteria.getEnabled(), criteria.getEmailVerified());
 
         if (withoutGroupsOnlyB) {
             qry.addPredicateWithoutGroupsOnly();
         } else {
-            qry.addPredicateForGroups(groups);
+            qry.addPredicateForGroups(criteria.getGroups());
         }
 
-        qry.addPredicateForRoles(roles);
+
+        MultivaluedMap<String, String> queryParams = criteria.getUriInfo().getQueryParameters();
+        List<String> fields = Arrays.stream(UserCriteria.class.getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toList());
+        logger.info("query parameters : " + queryParams);
+        Map<String, String> attributes = queryParams.entrySet().stream()
+                .filter(param -> !fields.contains(param.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
+        logger.info("filtered attributes : " + attributes);
+        qry.addPredicateForAttributes(attributes);
+
+        qry.addPredicateForRoles(criteria.getRoles());
         qry.applyPredicates();
 
         int count = qry.getTotalCount();
-        List<UserModel> results = qry.execute(firstResult, maxResults);
-        return new UsersPageRepresentation(toUserRepresentation(realm, clients, auth.users(), briefRepresentation, results), count);
+        List<UserModel> results = qry.execute(criteria.getFirstResult(), criteria.getMaxResults());
+        return new UsersPageRepresentation(toUserRepresentation(realm, clients, auth.users(), criteria.getBriefRepresentation(), results), count);
     }
 
     /**
