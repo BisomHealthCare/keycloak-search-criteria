@@ -1,6 +1,5 @@
 package fr.bisom.queries;
 
-import fr.bisom.resources.admin.UsersResource;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;

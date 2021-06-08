@@ -5,15 +5,12 @@ import fr.bisom.params.UserCriteria;
 import fr.bisom.queries.GetUsersByCriteriaQuery;
 import fr.bisom.representations.CustomUserRepresentation;
 import fr.bisom.representations.UsersPageRepresentation;
-import org.apache.commons.collections4.MultiValuedMap;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.annotations.Query;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.UserPermissionEvaluator;
@@ -22,15 +19,9 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +64,7 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
      * @param firstResult         Pagination offset
      * @param maxResults          Maximum results size (defaults to 100) - only taken into account if no group / role is defined
      * @param briefRepresentation Response format option
-     * @param withoutGroupsOnly      Return users without group memberships
+     * @param withoutGroupsOnly   Return users without group memberships
      * @return A list of users corresponding to the searched parameters, as well as the total count of users
      */
     @GET
@@ -100,13 +91,13 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
 
         MultivaluedMap<String, String> queryParams = criteria.getUriInfo().getQueryParameters();
         List<String> fields = Arrays.stream(UserCriteria.class.getDeclaredFields())
-                .map(Field::getName)
+                .map(f -> f.getAnnotation(QueryParam.class))
+                .filter(Objects::nonNull)
+                .map(QueryParam::value)
                 .collect(Collectors.toList());
-        logger.info("query parameters : " + queryParams);
         Map<String, String> attributes = queryParams.entrySet().stream()
                 .filter(param -> !fields.contains(param.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
-        logger.info("filtered attributes : " + attributes);
         qry.addPredicateForAttributes(attributes);
 
         qry.addPredicateForRoles(criteria.getRoles());

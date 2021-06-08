@@ -1,7 +1,5 @@
 package fr.bisom.representations;
 
-import org.keycloak.representations.idm.UserRepresentation;
-
 import java.util.List;
 
 /**
