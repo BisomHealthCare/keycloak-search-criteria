@@ -15,6 +15,7 @@ This table lists the compatibility of this extension with keycloak releases. Oth
 
 | Extension version  | Compatible keycloak versions  |
 |---|---|
+| 13.0.1  | 13.0.1 |
 | 12.0.4, 12.0.5  | 12.0.4 |
 | 11.0.3  | 11.0.3 |
 
