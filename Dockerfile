@@ -6,6 +6,6 @@ COPY src /home/app/src
 COPY pom.xml /home/app
 RUN mvn -f /home/app/pom.xml clean package -Dmaven.test.skip=true
 
-FROM jboss/keycloak:15.0.2
+FROM jboss/keycloak:15.1.0
 COPY --from=KeycloakExtension /home/app/target/keycloak-search-criteria-13.0.1.jar /opt/jboss/keycloak/standalone/deployments/
 
