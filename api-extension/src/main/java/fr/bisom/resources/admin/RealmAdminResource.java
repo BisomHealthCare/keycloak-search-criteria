@@ -13,11 +13,9 @@ public class RealmAdminResource extends org.keycloak.services.resources.admin.Re
 
     private final AdminEventBuilder adminEvent;
 
-    public RealmAdminResource(AdminPermissionEvaluator auth, RealmModel realm, TokenManager tokenManager,
-                              AdminEventBuilder adminEvent, KeycloakSession session) {
-        super(auth, realm, tokenManager, adminEvent);
+    public RealmAdminResource(AdminPermissionEvaluator auth, AdminEventBuilder adminEvent, KeycloakSession session) {
+        super(session, auth, adminEvent);
         this.adminEvent = adminEvent;
-        this.session = session;
     }
 
     /**

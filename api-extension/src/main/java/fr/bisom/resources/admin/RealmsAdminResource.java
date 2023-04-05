@@ -21,22 +21,18 @@ public class RealmsAdminResource extends org.keycloak.services.resources.admin.R
 
 
     public RealmsAdminResource(AdminAuth auth, TokenManager tokenManager, KeycloakSession session) {
-        super(auth, tokenManager);
-        this.session = session;
-        this.clientConnection = session.getContext().getConnection();
+        super(session, auth, tokenManager);
     }
 
     /**
      * Base path for the admin REST API for one particular realm.
      *
-     * @param headers
      * @param name    realm name (not id!)
      * @return
      */
     @Path("{realm}")
     @Override
-    public org.keycloak.services.resources.admin.RealmAdminResource getRealmAdmin(@Context final HttpHeaders headers,
-                                                                                  @PathParam("realm") final String name) {
+    public org.keycloak.services.resources.admin.RealmAdminResource getRealmAdmin(@PathParam("realm") String name) {
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName(name);
         if (realm == null) throw new NotFoundException("Realm not found.");
@@ -50,9 +46,11 @@ public class RealmsAdminResource extends org.keycloak.services.resources.admin.R
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth, session, clientConnection);
         session.getContext().setRealm(realm);
 
-        org.keycloak.services.resources.admin.RealmAdminResource adminResource = new RealmAdminResource(realmAuth, realm, tokenManager, adminEvent, session);
+        org.keycloak.services.resources.admin.RealmAdminResource adminResource = new RealmAdminResource(realmAuth, adminEvent, session);
         ResteasyProviderFactory.getInstance().injectProperties(adminResource);
         return adminResource;
     }
+
+
 
 }

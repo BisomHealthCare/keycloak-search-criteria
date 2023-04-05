@@ -36,10 +36,10 @@ public class UsersResource extends org.keycloak.services.resources.admin.UsersRe
     protected static final Logger logger = Logger.getLogger(UsersResource.class);
 
     public UsersResource(KeycloakSession session, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent) {
-        super(session.getContext().getRealm(), auth, adminEvent);
+        super(session, auth, adminEvent);
         this.auth = auth;
         this.kcSession = session;
-        this.clients = kcSession.clients().getClients(realm);
+        this.clients = kcSession.clients().getClientsStream(realm).collect(Collectors.toList());
     }
 
     /**

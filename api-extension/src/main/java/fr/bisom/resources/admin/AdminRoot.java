@@ -1,9 +1,9 @@
 package fr.bisom.resources.admin;
 
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.spi.HttpRequest;
-import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.keycloak.http.HttpRequest;
+import org.keycloak.http.HttpResponse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.Cors;
 import org.keycloak.services.resources.admin.AdminAuth;
