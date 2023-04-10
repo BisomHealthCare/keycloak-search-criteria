@@ -20,6 +20,7 @@ services:
       KEYCLOAK_DATABASE_NAME: keycloak
       KEYCLOAK_DATABASE_USER: keycloak
       KEYCLOAK_DATABASE_PASSWORD: keycloak
+      KEYCLOAK_EXTRA_ARGS: "--log-level=INFO"
 
 
   maildev:

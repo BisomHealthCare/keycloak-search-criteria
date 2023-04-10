@@ -1,0 +1,3 @@
+[submodule "2fa-email-authenticator"]
+	path = 2fa-email-authenticator
+	url = https://github.com/mesutpiskin/keycloak-2fa-email-authenticator.git
