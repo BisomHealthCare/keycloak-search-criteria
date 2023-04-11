@@ -11,6 +11,7 @@
 
     <modules>
         <module>2fa-email-authenticator</module>
+        <module>magic-link-authenticator</module>
         <module>api-extension</module>
     </modules>
 
