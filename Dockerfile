@@ -1,20 +1,20 @@
 #
 # Build keycloak extension
 #
-FROM maven:3.6.3-jdk-11-slim AS KeycloakExtension
+FROM maven:3.8.3-jdk-11-slim AS KeycloakExtension
 WORKDIR /workspace/app
 COPY pom.xml iam/
 COPY 2fa-email-authenticator/pom.xml iam/2fa-email-authenticator/
 COPY api-extension/pom.xml iam/api-extension/
 COPY magic-link-authenticator/pom.xml iam/magic-link-authenticator/
 
-RUN mvn --batch-mode dependency:go-offline install -DskipTests -B -f iam
+RUN mvn --batch-mode dependency:go-offline clean install -DskipTests -B -f iam
 
 COPY 2fa-email-authenticator/src iam/2fa-email-authenticator/src
 COPY api-extension/src iam/api-extension/src
 COPY magic-link-authenticator/src iam/magic-link-authenticator/src
 
-RUN mvn --batch-mode install -DskipTests -f iam
+RUN mvn --batch-mode clean install -DskipTests -f iam
 
 FROM bitnami/keycloak:21.0.2
 COPY --from=KeycloakExtension /workspace/app/iam/2fa-email-authenticator/target/keycloak-2fa-email-authenticator-1.0.0.0-SNAPSHOT.jar /opt/bitnami/keycloak/providers/
