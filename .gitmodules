@@ -1,6 +1,8 @@
 [submodule "2fa-email-authenticator"]
 	path = 2fa-email-authenticator
 	url = https://github.com/BisomHealthCare/bisom-keycloak-2fa-email-authenticator.git
+	branch = master
 [submodule "magic-link-authenticator"]
 	path = magic-link-authenticator
 	url = https://github.com/BisomHealthCare/bisom-keycloak-magic-link.git
+	branch = master
