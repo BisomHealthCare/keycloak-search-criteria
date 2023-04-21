@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  iam-db:
+    image: "postgres:alpine"
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+
+  iam:
+    build:
+      context: .
+    ports:
+      - "8081:8080"
+      - "8444:8443"
+    environment:
+      KEYCLOAK_ADMIN_USER: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_DATABASE_HOST: iam-db
+      KEYCLOAK_DATABASE_NAME: keycloak
+      KEYCLOAK_DATABASE_USER: keycloak
+      KEYCLOAK_DATABASE_PASSWORD: keycloak
+      KEYCLOAK_EXTRA_ARGS: "--log-level=INFO --spi-theme-static-max-age=-1 --spi-theme-cache-themes=false --spi-theme-cache-templates=false"
+
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+      - "1025:25"
+    environment:
+      MAILDEV_SMTP_PORT: 25
+      MAILDEV_WEB_PORT: 80
+      MAILDEV_INCOMING_USER: user
+      MAILDEV_INCOMING_PASS: user
