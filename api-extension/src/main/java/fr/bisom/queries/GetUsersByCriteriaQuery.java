@@ -249,7 +249,7 @@ public class GetUsersByCriteriaQuery {
         UserProvider users = session.users();
 
         return query.getResultList().stream()
-                .map(entity -> users.getUserById(entity.getId(), realm))
+                .map(entity -> users.getUserById(realm, entity.getId()))
                 .collect(Collectors.toList());
     }
 }

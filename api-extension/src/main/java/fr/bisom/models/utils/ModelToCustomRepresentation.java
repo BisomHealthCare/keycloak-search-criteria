@@ -26,21 +26,20 @@ public class ModelToCustomRepresentation extends ModelToRepresentation {
         rep.setEnabled(user.isEnabled());
         rep.setEmailVerified(user.isEmailVerified());
         rep.setTotp(session.userCredentialManager().isConfiguredFor(realm, user, "otp"));
-        rep.setDisableableCredentialTypes(session.userCredentialManager().getDisableableCredentialTypes(realm, user));
+        rep.setDisableableCredentialTypes(user.credentialManager().getDisableableCredentialTypesStream().collect(Collectors.toSet()));
         rep.setFederationLink(user.getFederationLink());
         rep.setNotBefore(session.users().getNotBeforeOfUser(realm, user));
         rep.setFullClientRoles(clients.stream().collect(Collectors.toMap(
                 ClientModel::getClientId,
-                client -> user.getClientRoleMappings(client).stream()
+                client -> user.getClientRoleMappingsStream(client)
                         .map(ModelToRepresentation::toRepresentation)
                         .collect(Collectors.toSet()))
         ));
-        rep.setFullRealmRoles(user.getRealmRoleMappings().stream()
+        rep.setFullRealmRoles(user.getRoleMappingsStream()
                 .map(ModelToRepresentation::toRepresentation)
                 .collect(Collectors.toSet())
         );
-        Set<String> requiredActions = user.getRequiredActions();
-        List<String> reqActions = new ArrayList(requiredActions);
+        List<String> reqActions = user.getRequiredActionsStream().distinct().collect(Collectors.toList());
         rep.setRequiredActions(reqActions);
         Map<String, List<String>> attributes = user.getAttributes();
         Map<String, List<String>> copy = null;
