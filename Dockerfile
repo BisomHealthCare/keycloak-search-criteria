@@ -16,9 +16,9 @@ COPY magic-link-authenticator/src iam/magic-link-authenticator/src
 
 RUN mvn --batch-mode clean install -DskipTests -f iam
 
-FROM bitnami/keycloak:21.0.2
+FROM bitnami/keycloak:25.0.5
 COPY --from=KeycloakExtension /workspace/app/iam/2fa-email-authenticator/target/keycloak-2fa-email-authenticator-1.0.0.0-SNAPSHOT.jar /opt/bitnami/keycloak/providers/
-COPY --from=KeycloakExtension /workspace/app/iam/api-extension/target/keycloak-search-criteria-21.0.2.jar /opt/bitnami/keycloak/providers/
+COPY --from=KeycloakExtension /workspace/app/iam/api-extension/target/keycloak-search-criteria-25.0.5.jar /opt/bitnami/keycloak/providers/
 COPY --from=KeycloakExtension /workspace/app/iam/magic-link-authenticator/target/keycloak-magic-link-0.9-SNAPSHOT.jar /opt/bitnami/keycloak/providers/
 COPY --from=KeycloakExtension /workspace/app/iam/magic-link-authenticator/target/original-keycloak-magic-link-0.9-SNAPSHOT.jar /opt/bitnami/keycloak/providers/
 
